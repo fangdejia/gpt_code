@@ -32,27 +32,52 @@ function! OpenGPTBuffer()
 endfunction
 
 function! GPTExplain()
-	echom "GPTExplain function called"
+    "代码解析
+	echom "GPTExplain called"
 	" 获取选中的文本
 	let selected_text = GetVisualSelection()
 
-	" 发送选中文本到 GPT API，获取响应（解析后的文本）
-	let response = gpt_api#SendToGPTAPI(selected_text)
     
 	call OpenGPTBuffer()
 	" 插入分割线，如果缓冲区非空
 	call append(line('$'), '')
-	let window_width = winwidth(0)-10
-	let separator = repeat('-', window_width)
-	call append(line('$'), separator)
+	call append(line('$'), repeat('-', winwidth(0)-10))
 	call append(line('$'), '')
     " 逐行插入到当前缓冲区
+	" 发送选中文本到 GPT API，获取响应（解析后的文本）
+	let response = gpt_api#SendToGPTAPI(selected_text)
     let lines = split(response, '\n')
     for line in lines
         call append(line('$'), line)
     endfor
 	normal! G
 	
+endfunction
+
+function! AskGPT(question)
+    "问题提问
+	echom "AskGPT called"
+	" 获取选中的文本
+	let selected_text = GetVisualSelection()
+    let q=a:question . ':' . selected_text 
+
+	call OpenGPTBuffer()
+	" 插入分割线，如果缓冲区非空
+	call append(line('$'), '')
+	call append(line('$'), repeat('-', winwidth(0)-10))
+	call append(line('$'), '')
+	call append(line('$'),q)
+	call append(line('$'), '')
+	call append(line('$'), repeat('-', winwidth(0)-10))
+	call append(line('$'), '')
+	normal! G
+
+	let response = gpt_api#SendToGPTAPI(selected_text)
+    let lines = split(response, '\n')
+    for line in lines
+        call append(line('$'), line)
+    endfor
+	normal! G
 endfunction
 
 vnoremap <leader>? :<C-u>call GPTExplain()<CR>
